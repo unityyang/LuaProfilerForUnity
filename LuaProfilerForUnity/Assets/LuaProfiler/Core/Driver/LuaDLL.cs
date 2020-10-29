@@ -1243,9 +1243,43 @@ end
         }
         #endregion
 
-
+        #region bind CsLuaProfiler
+        public static void BindCsLuaProfiler()
+        {
+            CsLuaProfiler.m_BeginSampleDelegate = BeginSample;
+            CsLuaProfiler.m_EndSampleDelegate = EndSample;
         }
+        public static void UnbindCsLuaProfiler()
+        {
+            CsLuaProfiler.m_BeginSampleDelegate = null;
+            CsLuaProfiler.m_EndSampleDelegate = null;
+        }
+        static bool IsProfiling()
+        {
+            return MikuLuaProfiler.LuaDLL.m_hooked && UnityEngine.Application.isPlaying && GetLusStatePtr() != IntPtr.Zero;
+        }
+        static IntPtr GetLusStatePtr()
+        {
+            return LuaProfiler.mainL;
+        }
+        static void BeginSample(int sampleId)
+        {
+            if (IsProfiling())
+            {
+                LuaProfiler.BeginSample(GetLusStatePtr(), sampleId);
+            }
+        }
+        static void EndSample()
+        {
+            if (IsProfiling())
+            {
+                LuaProfiler.EndSample(LuaProfiler.mainL);
+            }
+        }
+        #endregion
+
     }
+}
 #endif
       
       

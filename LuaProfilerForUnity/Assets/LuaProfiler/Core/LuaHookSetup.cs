@@ -117,9 +117,11 @@ namespace MikuLuaProfiler
 #if UNITY_EDITOR
             if (setting.isDeepLuaProfiler)
             {
+                LuaDLL.UnbindCsLuaProfiler();
                 LuaDLL.Instance.Uninstall();
                 LuaDLL.Instance.HookLoadLibrary();
                 LuaDLL.Instance.BindEasyHook();
+                LuaDLL.BindCsLuaProfiler();
                 //LuaDLL.Install();
 
                 if (setting.isCleanMode)

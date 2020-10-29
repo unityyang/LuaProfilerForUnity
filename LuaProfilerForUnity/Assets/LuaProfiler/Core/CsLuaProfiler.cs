@@ -17,38 +17,37 @@ public class CsLuaProfiler : ICsLuaProfiler
 
     public static ICsLuaProfiler CsInstance() { return (ICsLuaProfiler)__inst; }
 
+    public delegate void BeginSampleDelegate(int smapleId);
+    public static BeginSampleDelegate m_BeginSampleDelegate;
+    public delegate void EndSampleDelegate();
+    public static EndSampleDelegate m_EndSampleDelegate;
+
+
     [SLua.MonoPInvokeCallbackAttribute(typeof(SLua.LuaCSFunction))]
     [StaticExport]
     public static int LuaInstance(IntPtr l)
     {
-        LuaObject.pushValue(l, true);
-        LuaObject.pushObject(l, CsInstance());
+        SLua.LuaObject.pushValue(l, true);
+        SLua.LuaObject.pushObject(l, CsLuaProfiler.CsInstance());
         return 2;
-    }
-
-    IntPtr ptr_luaState { get { return LuaProfiler.mainL; } } //Get your self lua state ptr
-
-    bool IsProfiling()
-    {
-        return MikuLuaProfiler.LuaDLL.m_hooked && Application.isPlaying && ptr_luaState != IntPtr.Zero;
     }
 
 
     [SLua.MonoPInvokeCallbackAttribute(typeof(SLua.LuaCSFunction))]
     public void BeginSample(int sampleId)
     {
-        if (IsProfiling())
+        if(m_BeginSampleDelegate != null)
         {
-            LuaProfiler.BeginSample(ptr_luaState, sampleId);
+            m_BeginSampleDelegate(sampleId);
         }
     }
 
     [SLua.MonoPInvokeCallbackAttribute(typeof(SLua.LuaCSFunction))]
     public void EndSample()
     {
-        if (IsProfiling())
+        if(m_EndSampleDelegate != null)
         {
-            LuaProfiler.EndSample(LuaProfiler.mainL);
+            m_EndSampleDelegate();
         }
     }
 

@@ -15,3 +15,4 @@ MonoBehaviour:
   isDeepMonoProfiler: 0
   isDeepLuaProfiler: 0
   isLocal: 1
+  isSampleAll: 1

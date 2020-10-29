@@ -1,0 +1,9 @@
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\bin\Debug\CopyDll.dll
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\bin\Debug\CopyDll.pdb
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\obj\Debug\CopyDll.csprojAssemblyReference.cache
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\obj\Debug\CopyDll.csproj.CoreCompileInputs.cache
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\obj\Debug\CopyDll.csproj.CopyComplete
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\obj\Debug\CopyDll.dll
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\obj\Debug\CopyDll.pdb
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\bin\Debug\ProfilerLibrary.dll
+G:\UGit\LuaProfilerForUnity\LibraryScript\CopyDll\bin\Debug\ProfilerLibrary.pdb

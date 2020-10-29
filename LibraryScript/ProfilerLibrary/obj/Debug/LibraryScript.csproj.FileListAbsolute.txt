@@ -1,0 +1,5 @@
+G:\UGit\LuaProfilerForUnity\LibraryScript\LibraryScript\bin\Debug\LibraryScript.dll
+G:\UGit\LuaProfilerForUnity\LibraryScript\LibraryScript\bin\Debug\LibraryScript.pdb
+G:\UGit\LuaProfilerForUnity\LibraryScript\LibraryScript\obj\Debug\LibraryScript.csproj.CoreCompileInputs.cache
+G:\UGit\LuaProfilerForUnity\LibraryScript\LibraryScript\obj\Debug\LibraryScript.dll
+G:\UGit\LuaProfilerForUnity\LibraryScript\LibraryScript\obj\Debug\LibraryScript.pdb

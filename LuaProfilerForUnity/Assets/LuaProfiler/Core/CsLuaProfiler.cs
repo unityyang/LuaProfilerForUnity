@@ -4,23 +4,17 @@ using SLua;
 using UnityEngine;
 
 [CustomLuaClass]
-public interface ICsLuaProfiler
-{
-    void BeginSample(int sampleId);
-    void EndSample();
-}
-
-[CustomLuaClass]
-public class CsLuaProfiler : ICsLuaProfiler
+public class CsLuaProfiler
 {
     static CsLuaProfiler __inst = new CsLuaProfiler();
-
-    public static ICsLuaProfiler CsInstance() { return (ICsLuaProfiler)__inst; }
+    public static CsLuaProfiler Instance { get { return __inst; } }
 
     public delegate void BeginSampleDelegate(int smapleId);
     public static BeginSampleDelegate m_BeginSampleDelegate;
     public delegate void EndSampleDelegate();
     public static EndSampleDelegate m_EndSampleDelegate;
+    public delegate string GetSampleNameDelegate(int sampleId);
+    public static GetSampleNameDelegate m_GetSampleNameDelegate;
 
 
     [SLua.MonoPInvokeCallbackAttribute(typeof(SLua.LuaCSFunction))]
@@ -28,7 +22,7 @@ public class CsLuaProfiler : ICsLuaProfiler
     public static int LuaInstance(IntPtr l)
     {
         SLua.LuaObject.pushValue(l, true);
-        SLua.LuaObject.pushObject(l, CsLuaProfiler.CsInstance());
+        SLua.LuaObject.pushObject(l, CsLuaProfiler.Instance);
         return 2;
     }
 
@@ -53,16 +47,10 @@ public class CsLuaProfiler : ICsLuaProfiler
 
     public static string GetSampleName(int sampleId)
     {
-        return ((ECsLuaProfilerSample)sampleId).ToString();
+        if(m_GetSampleNameDelegate != null)
+        {
+            return m_GetSampleNameDelegate(sampleId);
+        }
+        return "[defaultSample]";
     }
 }
-
-public enum ECsLuaProfilerSample
-{
-    None = 0,
-    Sample1,
-    Sample2,
-    Sample3,
-    Sample4,
-}
-

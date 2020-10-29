@@ -2,22 +2,23 @@
 using System.Collections;
 using SLua;
 using System;
+using ProfilerLibrary;
 
-public class Circle : MonoBehaviour {
+public class DemoCircle : MonoBehaviour
+{
 
 
-	LuaSvr svr;
-	LuaTable self;
-	LuaFunction update;
+    LuaSvr svr;
+    LuaTable self;
+    LuaFunction update;
 
     [CustomLuaClass]
     public delegate void UpdateDelegate(object self);
 
     UpdateDelegate ud;
 
-	void Start () {
-		//MikuLuaProfiler.HookLuaSetup.OnStartGame();
-        Debug.Log("Hooked: " + MikuLuaProfiler.LuaDLL.m_hooked);
+    void Start()
+    {
         svr = new LuaSvr();
         svr.init(null, () =>
         {
@@ -25,10 +26,12 @@ public class Circle : MonoBehaviour {
             update = (LuaFunction)self["update"];
             ud = update.cast<UpdateDelegate>();
         });
-        Debug.Log("Hooked2: " + MikuLuaProfiler.LuaDLL.m_hooked);
-	}
-	
-	void Update () {
+    }
+
+    void Update()
+    {
+        Profilers.BeginSample((int)EProfilerSample.Sample3);
         if (ud != null) ud(self);
+        Profilers.EndSample();
     }
 }

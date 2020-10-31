@@ -92,7 +92,7 @@ namespace MikuLuaProfiler
             if (!string.IsNullOrEmpty(path))
             {
                 IntPtr ptr = LoadLibrary(path);
-                if (ptr == null)
+                if (ptr == IntPtr.Zero)
                 {
                     Debug.LogError("dont't move dll file to other place");
                     return;

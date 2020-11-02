@@ -20,11 +20,11 @@ Profiler部分是基于[Miku-LuaProfiler](https://github.com/leinlin/Miku-LuaPro
 
 2. 打开LuaProfilerWindow
 
-   ![img](Document\pic\02.png)
+   ![img](Document/pic/02.png)
 
 3. 依次点击`Deep Lua` -> `Record` -> `StartRecord`
 
-   ![img](Document\pic\01.png)
+   ![img](Document/pic/01.png)
 
 4. 启动游戏，即可看到Profiler界面显示数据
 

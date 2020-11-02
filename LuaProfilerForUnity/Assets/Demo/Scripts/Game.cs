@@ -7,7 +7,6 @@ public class Game : MonoBehaviour
 {
     static Game __inst;
     public static Game Instance { get { return __inst; } }
-    public LuaProfilerScript m_luaProfiler;
     ProfilerProxyScript m_proxy;
     // Start is called before the first frame update
     void Start()
@@ -22,7 +21,6 @@ public class Game : MonoBehaviour
 
     void Init()
     {
-        m_luaProfiler = new LuaProfilerScript();
         m_proxy = new ProfilerProxyScript();
         ProfilerLibrary.ProfilerProxy.m_IProfilerProxy = m_proxy;
     }

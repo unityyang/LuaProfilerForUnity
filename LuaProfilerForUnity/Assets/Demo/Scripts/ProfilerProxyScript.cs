@@ -1,4 +1,5 @@
-﻿using ProfilerLibrary;
+﻿using MikuLuaProfiler;
+using ProfilerLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ public class ProfilerProxyScript : IProfilerProxy
 {
     public ILuaProfiler GetLuaProfiler()
     {
-        return Game.Instance.m_luaProfiler;
+        return LuaProfilerScript.Instance;
     }
 }

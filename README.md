@@ -6,6 +6,10 @@ Lua部分使用的是[Slua](https://github.com/pangweiwei/slua)。
 
 Profiler部分是基于[Miku-LuaProfiler](https://github.com/leinlin/Miku-LuaProfiler)的修改
 
+### UnityPackage
+
+[unity package](Package)
+
 ### 示例说明
 
 1. 打开Demo场景 Assets/Demo/Scenes/Start

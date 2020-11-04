@@ -22,7 +22,7 @@ public class DemoCircle : MonoBehaviour
         svr = new LuaSvr();
         svr.init(null, () =>
         {
-            self = (LuaTable)svr.start("circle/circle");
+            self = (LuaTable)svr.start("DemoCircle");
             update = (LuaFunction)self["update"];
             ud = update.cast<UpdateDelegate>();
         });

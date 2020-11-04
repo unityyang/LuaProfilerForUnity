@@ -1,6 +1,14 @@
 
 import "UnityEngine"
 
+ECsLuaProfilerSample = 
+{
+    None = 0,
+    Sample1 = 1,
+    Sample2 = 2,
+    Sample3 = 3,
+}
+
 if not UnityEngine.GameObject or not  UnityEngine.UI then
 	error("Click Make/All to generate lua wrap file")
 end
@@ -91,4 +99,19 @@ function class:update() -- gc alloc is zero
 		self.f=0
 		self.framet=self.framet-1
 	end
+
+	-- MikuLuaProfiler.LuaProfiler.BeginSampleCustom("custom");
+	CsLuaProfiler.LuaInstance():BeginSample(ECsLuaProfilerSample.Sample1);
+	CsLuaProfiler.LuaInstance():BeginSample(ECsLuaProfilerSample.Sample2);
+	class:CustomFunc();
+	CsLuaProfiler.LuaInstance():EndSample();
+	CsLuaProfiler.LuaInstance():EndSample();
+	-- MikuLuaProfiler.LuaProfiler.EndSampleCustom();
+end
+
+function class:CustomFunc()
+	local lab = function()
+		print("Print Custom");
+	end
+	lab();
 end

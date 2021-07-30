@@ -49,4 +49,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>ECHO COPY $(TargetName)$(TargetExt)
+copy $(ProjectDir)\bin\Debug\$(TargetName)$(TargetExt) $(SolutionDir)\Assets\CsLuaProfiler\Plugins
+ECHO $(TargetName).pdb
+copy $(ProjectDir)\bin\Debug\$(TargetName).pdb $(SolutionDir)\Assets\CsLuaProfiler\Plugins
+ECHO --%25TIME%25--
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

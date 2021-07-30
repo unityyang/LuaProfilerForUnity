@@ -100,13 +100,9 @@ function class:update() -- gc alloc is zero
 		self.framet=self.framet-1
 	end
 
-	-- MikuLuaProfiler.LuaProfiler.BeginSampleCustom("custom");
-	CsLuaProfiler.LuaInstance():BeginSample(ECsLuaProfilerSample.Sample1);
-	CsLuaProfiler.LuaInstance():BeginSample(ECsLuaProfilerSample.Sample2);
+	ProfilerLibrary.ScriptTimeProfiler.BeginSample(ProfilerLibrary.EProfilerSampleEnum.Sample1);
 	class:CustomFunc();
-	CsLuaProfiler.LuaInstance():EndSample();
-	CsLuaProfiler.LuaInstance():EndSample();
-	-- MikuLuaProfiler.LuaProfiler.EndSampleCustom();
+	ProfilerLibrary.ScriptTimeProfiler.EndSample();
 end
 
 function class:CustomFunc()

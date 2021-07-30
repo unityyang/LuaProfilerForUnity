@@ -354,6 +354,21 @@ namespace SLua
 
             try
             {
+                // export ProfilerLibrary dll
+                assembly = Assembly.Load("ProfilerLibrary");
+                types = assembly.GetExportedTypes();
+                foreach (Type t in types)
+                {
+                    if (t.IsPublic)
+                    {
+                        fun(t, null);
+                    }
+                }
+            }
+            catch (Exception) { }
+
+            try
+            {
                 // export plugin-dll
                 assembly = Assembly.Load("Assembly-CSharp-firstpass");
                 types = assembly.GetExportedTypes();

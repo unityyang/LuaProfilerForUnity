@@ -30,8 +30,8 @@ public class DemoCircle : MonoBehaviour
 
     void Update()
     {
-        Profilers.BeginSample((int)EProfilerSample.Sample3);
+        ScriptTimeProfiler.BeginSample(EProfilerSampleEnum.Sample3);
         if (ud != null) ud(self);
-        Profilers.EndSample();
+        ScriptTimeProfiler.EndSample();
     }
 }

@@ -221,10 +221,10 @@ namespace MikuLuaProfiler
 
     public class SampleData
     {
-        public static int frameCount;
-        public static float fps;
-        public static uint pss;
-        public static float power;
+        public static int frameCount { get { return CsLuaProfiler.SampleData.frameCount; } }
+        public static float fps { get { return CsLuaProfiler.SampleData.fps; } }
+        public static uint pss { get { return CsLuaProfiler.SampleData.pss; } }
+        public static float power { get { return CsLuaProfiler.SampleData.power; } }
     }
 
     public class Sample : NetBase
@@ -241,26 +241,23 @@ namespace MikuLuaProfiler
 
         public int costLuaGC;
         public int costMonoGC;
-        public int sampleId;
-        string m_name;
+        public int sampleId = -1;
+        private string m_name;
         public string name
         {
             get
             {
-                if (sampleId >= 0)
+                if(sampleId >= 0)
                 {
                     return CsLuaProfiler.GetSampleName(sampleId);
                 }
-                else
-                {
-                    return m_name;
-                }
+                return m_name;
             }
             set
             {
                 m_name = value;
             }
-        }
+        } 
         public int costTime;
         public Sample _father;
         public MList<Sample> childs = new MList<Sample>(16);
@@ -485,6 +482,31 @@ namespace MikuLuaProfiler
             s.costLuaGC = 0;
             s.costMonoGC = 0;
             s.name = null;
+            s.sampleId = sampleId;
+            s.costTime = 0;
+            s._father = null;
+            s.childs.Clear();
+            s.captureUrl = null;
+            s._fullName = null;
+            s.needShow = false;
+
+            return s;
+        }
+        public static Sample Create2(int sampleId, string name, long time, int lua_memory, int mono_memory, int frame_count, float fps, uint pss, float power)
+        {
+            Sample s = samplePool.GetObject();
+
+            s.calls = 1;
+            s.currentTime = time;
+            s.currentLuaMemory = lua_memory;
+            s.currentMonoMemory = mono_memory;
+            s.frameCount = frame_count;
+            s.fps = fps;
+            s.pss = pss;
+            s.power = power;
+            s.costLuaGC = 0;
+            s.costMonoGC = 0;
+            s.name = name;
             s.sampleId = sampleId;
             s.costTime = 0;
             s._father = null;

@@ -34,8 +34,6 @@ __________#_______####_______####______________
 */
 
 #if UNITY_EDITOR_WIN || USE_LUA_PROFILER
-using MikuLuaProfiler;
-using SLua;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -81,6 +79,7 @@ namespace MikuLuaProfiler
         {
 #if UNITY_EDITOR
             if (!Application.isPlaying) return;
+            LuaDLL.m_hooked = false;
 #endif
 #if UNITY_EDITOR_WIN
             string path = null;
@@ -115,13 +114,14 @@ namespace MikuLuaProfiler
             }
 
 #if UNITY_EDITOR
+            LuaProfiler.UnbindCallbacks();
+            LuaProfiler.BindCallbacks();
             if (setting.isDeepLuaProfiler)
             {
-                LuaDLL.UnbindCsLuaProfiler();
-                LuaDLL.Instance.Uninstall();
-                LuaDLL.Instance.HookLoadLibrary();
-                LuaDLL.Instance.BindEasyHook();
-                LuaDLL.BindCsLuaProfiler();
+                LuaDLL.Uninstall();
+                LuaDLL.HookLoadLibrary();
+                LuaDLL.BindEasyHook();
+                //ScriptTimeProfiler.luaProfiler = LuaProfilerQS.Instance;
                 //LuaDLL.Install();
 
                 if (setting.isCleanMode)
@@ -162,21 +162,21 @@ namespace MikuLuaProfiler
                     }
                 }
             }
-            SampleData.frameCount = Time.frameCount;
-            count++;
-            deltaTime += Time.unscaledDeltaTime;
-            if (deltaTime >= showTime)
-            {
-                SampleData.fps = count / deltaTime;
-                count = 0;
-                deltaTime = 0f;
-            }
-            if (Time.unscaledTime - currentTime > DELTA_TIME)
-            {
-                SampleData.pss = NativeHelper.GetPass();
-                SampleData.power = NativeHelper.GetBatteryLevel();
-                currentTime = Time.unscaledTime;
-            }
+            //SampleData.frameCount = Time.frameCount;
+            //count++;
+            //deltaTime += Time.unscaledDeltaTime;
+            //if (deltaTime >= showTime)
+            //{
+            //    SampleData.fps = count / deltaTime;
+            //    count = 0;
+            //    deltaTime = 0f;
+            //}
+            //if (Time.unscaledTime - currentTime > DELTA_TIME)
+            //{
+            //    SampleData.pss = NativeHelper.GetPass();
+            //    SampleData.power = NativeHelper.GetBatteryLevel();
+            //    currentTime = Time.unscaledTime;
+            //}
             LuaProfiler.SendFrameSample();
             if (Input.touchCount == 4 || Input.GetKeyDown(KeyCode.Delete))
             {
@@ -795,7 +795,7 @@ namespace MikuLuaProfiler
 
             LuaDLL.lua_newtable(L);
             LuaDLL.lua_setglobal(L, "MikuLuaProfilerStrTb");
-            if (LuaDeepProfilerSetting.Instance.IsSampleAll)
+            if (LuaDeepProfilerSetting.Instance.isSampleAll)
             {
                 LuaLib.DoString(L, get_ref_string);
                 LuaLib.DoString(L, null_script);
@@ -809,7 +809,7 @@ namespace MikuLuaProfiler
             LuaDLL.lua_setglobal(L, "miku_handle_error");
         }
 
-            #region script
+#region script
         const string get_ref_string = @"
 local weak_meta_table = {__mode = 'k'}
 local infoTb = {}
@@ -1119,7 +1119,7 @@ function miku_diff(record, staticRecord)
 
     return add,remain,null_list
 end";
-            #endregion
+#endregion
 
         [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
         static int BeginSample(IntPtr L)
@@ -1195,7 +1195,7 @@ end";
             return 0;
         }
     }
-#endregion
+    #endregion
 
 }
 #endif

@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ProfilerLibrary
 {
-    public interface IProfilerProxy
+    public interface IScriptProxy
     {
-        ILuaProfiler GetLuaProfiler();
+        ICsLuaProfiler GetCsLuaProfiler();
     }
     public class ProfilerProxy
     {
-        public static IProfilerProxy m_IProfilerProxy;
+        public static IScriptProxy m_ScriptProxy;
     }
 }

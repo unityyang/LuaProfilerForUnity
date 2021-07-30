@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class ProfilerProxyScript : IProfilerProxy
+public class ProfilerProxyScript : IScriptProxy
 {
-    public ILuaProfiler GetLuaProfiler()
+    public ICsLuaProfiler GetCsLuaProfiler()
     {
-        return LuaProfilerScript.Instance;
+        return CsLuaProfiler.Instance as ICsLuaProfiler;
     }
 }

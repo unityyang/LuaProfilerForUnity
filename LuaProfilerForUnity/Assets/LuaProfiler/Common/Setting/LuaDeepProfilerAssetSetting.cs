@@ -43,10 +43,10 @@ namespace MikuLuaProfiler
     {
 
         #region memeber
+        public bool isSampleAll = true;
         public bool isDeepMonoProfiler = false;
         public bool isDeepLuaProfiler = false;
         public bool isLocal = true;
-        public bool isSampleAll = true;
 
         private static LuaDeepProfilerAssetSetting instance;
         public static LuaDeepProfilerAssetSetting Instance

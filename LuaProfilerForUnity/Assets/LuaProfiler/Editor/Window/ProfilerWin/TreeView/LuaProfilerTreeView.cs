@@ -715,7 +715,7 @@ namespace MikuLuaProfiler
             {
                 var selectItem = FindItem(id, BuildRoot());
                 var item = (LuaProfilerTreeViewItem)selectItem;
-                if (item == null)
+                if(item == null)
                 {
                     return;
                 }

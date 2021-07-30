@@ -35,14 +35,12 @@ __________#_______####_______####______________
 
 #if UNITY_EDITOR_WIN || USE_LUA_PROFILER
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using EasyHook;
-using UnityEngine.Rendering;
+
 
 namespace MikuLuaProfiler
 {
@@ -84,8 +82,6 @@ namespace MikuLuaProfiler
 
     public class LuaDLL
     {
-        static LuaDLL __inst = new LuaDLL();
-        public static LuaDLL Instance { get { return __inst; } }
         public static int LUA_VERSION = 510;
         public static bool IS_LUA_JIT = false;
 
@@ -114,20 +110,19 @@ namespace MikuLuaProfiler
         #endregion
 
         #region hooks
-        private LocalHook luaL_newstate_hook;
-        private LocalHook lua_close_hook;
-        private LocalHook lua_gc_hook;
-        private LocalHook lua_call_hook;
-        private LocalHook lua_error_hook;
-        private LocalHook luaL_openlibs_hook;
-        private LocalHook luaL_ref_hook;
-        private LocalHook luaL_unref_hook;
-        private LocalHook luaL_loadbuffer_hook;
-        private LocalHook luaL_loadfile_hook;
-        private LocalHook toluaL_ref_hook;
-        private LocalHook toluaL_unref_hook;
-        private LocalHook load_dll_hook;
-        private List<LocalHook> hookList = new List<LocalHook>();
+        private static LocalHook luaL_newstate_hook;
+        private static LocalHook lua_close_hook;
+        private static LocalHook lua_gc_hook;
+        private static LocalHook lua_call_hook;
+        private static LocalHook lua_error_hook;
+        private static LocalHook luaL_openlibs_hook;
+        private static LocalHook luaL_ref_hook;
+        private static LocalHook luaL_unref_hook;
+        private static LocalHook luaL_loadbuffer_hook;
+        private static LocalHook luaL_loadfile_hook;
+        private static LocalHook toluaL_ref_hook;
+        private static LocalHook toluaL_unref_hook;
+        private static LocalHook load_dll_hook;
         #endregion
 
         #region 通用操作
@@ -375,9 +370,9 @@ end
 
         public static int luaL_loadbufferUnHook(IntPtr luaState, byte[] buff, IntPtr size, string name)
         {
-            if (__inst.luaL_loadbuffer_hook != null)
+            if (luaL_loadbuffer_hook != null)
             {
-                UnInstallHook(__inst.luaL_loadbuffer_hook);
+                UnInstallHook(luaL_loadbuffer_hook);
             }
             IntPtr intPtr = NativeUtility.ConvertByteArrayToPtr(buff);
             int result;
@@ -389,9 +384,9 @@ end
             {
                 result = luaL_loadbuffer(luaState, intPtr, size, name);
             }
-            if (__inst.luaL_loadbuffer_hook != null)
+            if (luaL_loadbuffer_hook != null)
             {
-                InstallHook(__inst.luaL_loadbuffer_hook);
+                InstallHook(luaL_loadbuffer_hook);
             }
             return result;
         }
@@ -437,7 +432,6 @@ end
         public static void InstallHook(LocalHook hook)
         {
             hook.ThreadACL.SetInclusiveACL(openFlag);
-            __inst.hookList.Add(hook);
         }
 
         public static void UnInstallHook(LocalHook hook)
@@ -445,20 +439,12 @@ end
             hook.ThreadACL.SetInclusiveACL(closeFlag);
         }
 
-        public void Uninstall()
+        public static void Uninstall()
         {
-            for(int i = 0; i < __inst.hookList.Count; ++i)
+            if (load_dll_hook != null)
             {
-                if (__inst.hookList[i] != null)
-                {
-                    __inst.hookList[i].Dispose();
-                }
-            }
-            __inst.hookList.Clear();
-            if (__inst.load_dll_hook != null)
-            {
-                __inst.load_dll_hook.Dispose();
-                __inst.load_dll_hook = null;
+                load_dll_hook.Dispose();
+                load_dll_hook = null;
             }
 
             if (luaL_newstate_hook != null)
@@ -510,7 +496,7 @@ end
             }
         }
 
-        public void BindEasyHook()
+        public static void BindEasyHook()
         {
             if (m_hooked) return;
             string moduleName = CheckHasLuaDLL();
@@ -561,7 +547,6 @@ end
                 return;
             }
             UnityEngine.Debug.Log("lua versin:" + LUA_VERSION);
-            hookList.Clear();
             if (luaL_newstate_hook == null)
             {
                 IntPtr handle = GetProcAddress(moduleName, "luaL_newstate");
@@ -637,8 +622,7 @@ end
                     InstallHook(luaL_unref_hook);
                 }
             }
-
-            if (LuaDeepProfilerSetting.Instance.IsSampleAll)
+            if (LuaDeepProfilerSetting.Instance.isSampleAll)
             {
                 if (luaL_loadbuffer_hook == null)
                 {
@@ -954,7 +938,7 @@ end
             m_hooked = true;
         }
 
-        public void HookLoadLibrary()
+        public static void HookLoadLibrary()
         {
             IntPtr handle = GetProcAddress("KernelBase.dll", "LoadLibraryExW");
             if (handle == IntPtr.Zero)
@@ -980,7 +964,7 @@ end
             {
                 if (NativeAPI.GetProcAddress(ret, "luaL_newstate") != IntPtr.Zero)
                 {
-                    Instance.BindEasyHook();
+                    BindEasyHook();
                 }
             }
             return ret;
@@ -1243,43 +1227,9 @@ end
         }
         #endregion
 
-        #region bind CsLuaProfiler
-        public static void BindCsLuaProfiler()
-        {
-            CsLuaProfiler.m_BeginSampleDelegate = BeginSample;
-            CsLuaProfiler.m_EndSampleDelegate = EndSample;
-        }
-        public static void UnbindCsLuaProfiler()
-        {
-            CsLuaProfiler.m_BeginSampleDelegate = null;
-            CsLuaProfiler.m_EndSampleDelegate = null;
-        }
-        static bool IsProfiling()
-        {
-            return MikuLuaProfiler.LuaDLL.m_hooked && UnityEngine.Application.isPlaying && GetLusStatePtr() != IntPtr.Zero;
-        }
-        static IntPtr GetLusStatePtr()
-        {
-            return LuaProfiler.mainL;
-        }
-        static void BeginSample(int sampleId)
-        {
-            if (IsProfiling())
-            {
-                LuaProfiler.BeginSample(GetLusStatePtr(), sampleId);
-            }
-        }
-        static void EndSample()
-        {
-            if (IsProfiling())
-            {
-                LuaProfiler.EndSample(LuaProfiler.mainL);
-            }
-        }
-        #endregion
 
+        }
     }
-}
 #endif
       
       

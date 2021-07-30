@@ -65,7 +65,17 @@ namespace MikuLuaProfiler
             }
         }
         #endregion
-
+        public bool isSampleAll
+        {
+            get
+            {
+                return LuaDeepProfilerAssetSetting.Instance.isSampleAll;
+            }
+            set
+            {
+                LuaDeepProfilerAssetSetting.Instance.isSampleAll = value;
+            }
+        }
         public bool isDeepMonoProfiler
         {
             get
@@ -76,12 +86,6 @@ namespace MikuLuaProfiler
             {
                 LuaDeepProfilerAssetSetting.Instance.isDeepMonoProfiler = value;
             }
-        }
-
-        public bool IsSampleAll
-        {
-            get { return LuaDeepProfilerAssetSetting.Instance.isSampleAll; }
-            set { LuaDeepProfilerAssetSetting.Instance.isSampleAll = value; }
         }
 
         public bool isDeepLuaProfiler

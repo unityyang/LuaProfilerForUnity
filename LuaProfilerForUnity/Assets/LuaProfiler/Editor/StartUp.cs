@@ -297,7 +297,7 @@ namespace MikuLuaProfiler
         private static Instruction FirstInstructionSkipCtor(MethodDefinition Method)
         {
             var body = Method.Body;
-            if (body != null)
+            if(body != null)
             {
                 if (Method.IsConstructor && !Method.IsStatic)
                 {

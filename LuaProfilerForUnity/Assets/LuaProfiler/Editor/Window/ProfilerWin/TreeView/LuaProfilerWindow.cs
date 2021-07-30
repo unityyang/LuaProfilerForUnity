@@ -1,4 +1,4 @@
-﻿/*
+/*
                #########                       
               ############                     
               #############                    
@@ -40,6 +40,9 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 using System;
+using UnityEngine.Experimental.Networking.PlayerConnection;
+using UnityEditor.Networking.PlayerConnection;
+using UnityEngine.Networking.PlayerConnection;
 
 namespace MikuLuaProfiler
 {
@@ -124,6 +127,9 @@ namespace MikuLuaProfiler
         private static LuaDiffScrollView m_luaDiffScrollView = null;
         #endregion
 
+        IConnectionState m_AttachToPlayerState;
+        string m_lastAttachToPlayerName = string.Empty;
+
         private static void DoClearTreeView()
         {
             currentFrameIndex = 0;
@@ -148,6 +154,13 @@ namespace MikuLuaProfiler
 #endif
             var clearMethod = logEntries.GetMethod("Clear", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             clearMethod.Invoke(null, null);
+        }
+
+        private void Awake()
+        {
+            EditorConnection.instance.Initialize();
+            EditorConnection.instance.RegisterConnection(OnConnect);
+            EditorConnection.instance.RegisterDisconnection(OnDisconnect);
         }
 
         void OnEnable()
@@ -202,6 +215,16 @@ namespace MikuLuaProfiler
             EditorApplication.update += m_TreeView.DequeueSample;
             EditorApplication.update -= m_luaRefScrollView.DequeueLuaInfo;
             EditorApplication.update += m_luaRefScrollView.DequeueLuaInfo;
+
+            if (!m_editorConnectionRegistHandler)
+            {
+                EditorConnection.instance.Register(CsLuaProfiler.m_playerConnectionMsgTick, Handle_MsgTick);
+                m_editorConnectionRegistHandler = true;
+            }
+            if (m_AttachToPlayerState == null)
+            {
+                m_AttachToPlayerState = UnityEditor.Experimental.Networking.PlayerConnection.EditorGUIUtility.GetAttachToPlayerState(this);
+            }
         }
 
         private void OnDisable()
@@ -222,6 +245,18 @@ namespace MikuLuaProfiler
             boxTex = null;
             EditorApplication.update -= m_TreeView.DequeueSample;
             EditorApplication.update -= m_luaRefScrollView.DequeueLuaInfo;
+
+            CsLuaProfiler.SetProfilerEnable(false);
+            if (m_AttachToPlayerState != null)
+            {
+                m_AttachToPlayerState.Dispose();
+                m_AttachToPlayerState = null;
+            }
+            if (m_editorConnectionRegistHandler)
+            {
+                EditorConnection.instance.Unregister(CsLuaProfiler.m_playerConnectionMsgTick, Handle_MsgTick);
+                m_editorConnectionRegistHandler = false;
+            }
         }
 
         void Destory(UnityEngine.Object o)
@@ -259,6 +294,7 @@ namespace MikuLuaProfiler
             if (isShowRef)
             {
                 EditorGUILayout.BeginVertical();
+                
                 if (GUILayout.Button("log to file"))
                 {
                     m_luaRefScrollView.LogToFile();
@@ -394,13 +430,13 @@ namespace MikuLuaProfiler
             else
             {
                 GUILayout.Space(10);
-                flag = GUILayout.Toggle(setting.IsSampleAll, "Sample All", EditorStyles.toolbarButton);
-                if (flag != setting.IsSampleAll)
+                flag = GUILayout.Toggle(setting.isSampleAll, "Sample All", EditorStyles.toolbarButton);
+                if (flag != setting.isSampleAll)
                 {
-                    setting.IsSampleAll = flag;
+                    setting.isSampleAll = flag;
                     EditorApplication.isPlaying = false;
                 }
-
+                
                 flag = GUILayout.Toggle(setting.isDeepLuaProfiler, "Deep Lua", EditorStyles.toolbarButton);
                 if (flag != setting.isDeepLuaProfiler)
                 {
@@ -510,6 +546,16 @@ namespace MikuLuaProfiler
             }
             #endregion
 
+            if (m_AttachToPlayerState != null)
+            {
+                UnityEditor.Experimental.Networking.PlayerConnection.EditorGUILayout.AttachToPlayerDropdown(m_AttachToPlayerState, EditorStyles.toolbarDropDown);
+                if (m_lastAttachToPlayerName != m_AttachToPlayerState.connectionName)
+                {
+                    LuaProfiler.ClearSampleStack();
+                    m_lastAttachToPlayerName = m_AttachToPlayerState.connectionName;
+                }
+            }
+
             #region gc value
             GUILayout.Space(100);
             GUILayout.FlexibleSpace();
@@ -544,11 +590,35 @@ namespace MikuLuaProfiler
                 m_TreeView.Clear(true);
                 m_luaRefScrollView.ClearRefInfo(true);
                 NetWorkServer.SendCmd(0);
+                CsLuaProfiler.Instance.Reset();
+                LuaProfiler.ClearSampleStack();
+                if (m_AttachToPlayerState.connectedToTarget == ConnectionTarget.Player)
+                {
+                    CsLuaProfiler.SetProfilerEnable(false);
+                    CsLuaProfiler.m_beginSampleImplCallback = LuaProfiler.BeginSampleImpl;
+                    CsLuaProfiler.m_endSampleImplCallback = LuaProfiler.EndSampleImpl;
+                    Send_EnableProfiler(true);
+                }
+                else
+                {
+                    CsLuaProfiler.SetProfilerEnable(true);
+                }
             }
 
             if (state && !instance.isStartRecord)
             {
                 m_TreeView.LoadHistoryCurve();
+                if (m_AttachToPlayerState.connectedToTarget == ConnectionTarget.Player)
+                {
+                    CsLuaProfiler.SetProfilerEnable(false);
+                    CsLuaProfiler.m_beginSampleImplCallback = null;
+                    CsLuaProfiler.m_endSampleImplCallback = null;
+                    Send_EnableProfiler(false);
+                }
+                else
+                {
+                    CsLuaProfiler.SetProfilerEnable(false);
+                }
             }
 
             int count = m_TreeView.history.Count - 1;
@@ -1246,6 +1316,30 @@ namespace MikuLuaProfiler
             LuaProfiler.RegisterOnReceiveDiffInfo(m_luaDiffScrollView.DelDiffInfo);
         }
 
+        #endregion
+
+        #region EditorConnection
+        bool m_editorConnectionRegistHandler = false;
+        void OnConnect(int arg)
+        {
+
+        }
+        void OnDisconnect(int arg)
+        {
+
+        }
+        void Send_EnableProfiler(bool enable)
+        {
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(BitConverter.GetBytes(1));
+            bytes.AddRange(BitConverter.GetBytes(enable));
+            EditorConnection.instance.Send(CsLuaProfiler.m_playerConnectionMsgEditorCmd, bytes.ToArray());
+        }
+        void Handle_MsgTick(MessageEventArgs evt)
+        {
+            byte[] bytes = evt.data;
+            CsLuaProfiler.Handle_MsgPackage(bytes);
+        }
         #endregion
 
         // Add menu named "My Window" to the Window menu

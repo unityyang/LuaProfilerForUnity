@@ -3,6 +3,7 @@
 .vscode
 *.suo
 Library
+Logs
 Temp
 UnityVS
 AssetStoreTools

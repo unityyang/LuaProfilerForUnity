@@ -17,7 +17,6 @@ public class Circle : MonoBehaviour {
 
 	void Start () {
 		//MikuLuaProfiler.HookLuaSetup.OnStartGame();
-        Debug.Log("Hooked: " + MikuLuaProfiler.LuaDLL.m_hooked);
         svr = new LuaSvr();
         svr.init(null, () =>
         {
@@ -25,7 +24,6 @@ public class Circle : MonoBehaviour {
             update = (LuaFunction)self["update"];
             ud = update.cast<UpdateDelegate>();
         });
-        Debug.Log("Hooked2: " + MikuLuaProfiler.LuaDLL.m_hooked);
 	}
 	
 	void Update () {
